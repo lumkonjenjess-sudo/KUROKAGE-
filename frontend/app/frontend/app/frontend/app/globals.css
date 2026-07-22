@@ -58,4 +58,23 @@ section h2 {
 section p {
   margin-top: 15px;
   font-size: 1.2rem;
+  button {
+  margin-top: 30px;
+  padding: 15px 40px;
+  background: white;
+  color: black;
+  border: none;
+  font-size: 1rem;
+  font-weight: bold;
+  cursor: pointer;
+  letter-spacing: 2px;
+}
+
+button:hover {
+  opacity: 0.8;
+}
+
+section:nth-child(3) {
+  padding: 50px 20px;
+}
 }
