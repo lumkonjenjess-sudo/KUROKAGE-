@@ -1,33 +1,23 @@
-import Navbar from "../components/Navbar";
-import ProductCard from "../components/ProductCard";
+import Navbar from "../../components/Navbar";
+import ProductCard from "../../components/ProductCard";
+import { products } from "../../data/products";
 
-export default function Home() {
+export default function Shop() {
   return (
     <main>
       <Navbar />
 
       <section>
-        <h1>KuroKage</h1>
-        <h2>Wear the Shadow</h2>
-        <p>Anime × Streetwear × Fashion</p>
+        <h1>KuroKage Shop</h1>
+        <p>Explore the Shadow Collection</p>
 
-        <button>
-          Enter Shop
-        </button>
-      </section>
-
-      <section>
-        <h2>Featured Collection</h2>
-
-        <ProductCard 
-          name="Shadow Raven Hoodie"
-          price="$49.99"
-        />
-
-        <ProductCard 
-          name="KuroKage Street Tee"
-          price="$29.99"
-        />
+        {products.map((product) => (
+          <ProductCard
+            key={product.id}
+            name={product.name}
+            price={product.price}
+          />
+        ))}
       </section>
     </main>
   );
