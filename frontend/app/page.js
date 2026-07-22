@@ -1,4 +1,5 @@
 import Navbar from "../components/Navbar";
+import ProductCard from "../components/ProductCard";
 
 export default function Home() {
   return (
@@ -17,7 +18,16 @@ export default function Home() {
 
       <section>
         <h2>Featured Collection</h2>
-        <p>Premium anime-inspired streetwear coming soon.</p>
+
+        <ProductCard 
+          name="Shadow Raven Hoodie"
+          price="$49.99"
+        />
+
+        <ProductCard 
+          name="KuroKage Street Tee"
+          price="$29.99"
+        />
       </section>
     </main>
   );
