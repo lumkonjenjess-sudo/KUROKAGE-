@@ -1,6 +1,8 @@
 # KuroKage Frontend
 
-This folder contains the KuroKage app interface:
+KuroKage anime streetwear ecommerce app interface.
+
+This folder will contain:
 - Homepage
 - Product pages
 - User dashboard
