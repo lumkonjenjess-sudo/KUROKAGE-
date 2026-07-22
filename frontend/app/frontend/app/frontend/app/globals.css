@@ -58,7 +58,9 @@ section h2 {
 section p {
   margin-top: 15px;
   font-size: 1.2rem;
-  button {
+}
+
+button {
   margin-top: 30px;
   padding: 15px 40px;
   background: white;
@@ -74,7 +76,21 @@ button:hover {
   opacity: 0.8;
 }
 
-section:nth-child(3) {
-  padding: 50px 20px;
+.product-card {
+  margin-top: 30px;
+  padding: 25px;
+  border: 1px solid #333;
+  width: 300px;
+  text-align: center;
+  background: #111;
 }
+
+.product-card h3 {
+  font-size: 1.5rem;
+  letter-spacing: 2px;
+}
+
+.product-card p {
+  margin: 15px 0;
+  font-size: 1.1rem;
 }
