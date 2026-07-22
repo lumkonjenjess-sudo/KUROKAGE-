@@ -1,3 +1,5 @@
+import "./globals.css";
+
 export const metadata = {
   title: "KuroKage",
   description: "Anime × Streetwear × Fashion",
