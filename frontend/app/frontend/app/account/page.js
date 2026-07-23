@@ -2,15 +2,22 @@
 
 import { useState } from "react";
 import Navbar from "../../components/Navbar";
+
 import {
   getAuth,
   signInWithEmailAndPassword,
-  createUserWithEmailAndPassword
+  createUserWithEmailAndPassword,
+  signInWithPopup,
+  GoogleAuthProvider
 } from "firebase/auth";
 
 import app from "../../../backend/firebase/firebase";
 
+
 const auth = getAuth(app);
+
+const provider = new GoogleAuthProvider();
+
 
 export default function Account() {
 
@@ -44,7 +51,20 @@ export default function Account() {
   }
 
 
+  async function googleLogin() {
+
+    await signInWithPopup(
+      auth,
+      provider
+    );
+
+    alert("Google login successful");
+
+  }
+
+
   return (
+
     <main>
 
       <Navbar />
@@ -58,7 +78,7 @@ export default function Account() {
 
         <input
           placeholder="Email"
-          onChange={(e) =>
+          onChange={(e)=>
             setEmail(e.target.value)
           }
         />
@@ -67,7 +87,7 @@ export default function Account() {
         <input
           placeholder="Password"
           type="password"
-          onChange={(e) =>
+          onChange={(e)=>
             setPassword(e.target.value)
           }
         />
@@ -83,8 +103,15 @@ export default function Account() {
         </button>
 
 
+        <button onClick={googleLogin}>
+          Continue with Google
+        </button>
+
+
       </section>
 
     </main>
+
   );
+
 }
