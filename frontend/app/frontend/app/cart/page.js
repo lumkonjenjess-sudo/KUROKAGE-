@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import Navbar from "../../components/Navbar";
 import { useCart } from "../../context/CartContext";
 
@@ -100,6 +101,14 @@ export default function Cart() {
             <h2>
               Total: ${total.toFixed(2)}
             </h2>
+
+
+            <Link href="/checkout">
+              <button>
+                Checkout
+              </button>
+            </Link>
+
 
           </>
 
