@@ -10,12 +10,15 @@ export default function Checkout() {
   const { cart } = useCart();
 
   const [email, setEmail] = useState("");
+  const [paymentMethod, setPaymentMethod] = useState("");
+
 
   async function placeOrder() {
 
     await createOrder({
       email,
       items: cart,
+      paymentMethod,
       status: "pending"
     });
 
@@ -44,6 +47,36 @@ export default function Checkout() {
 
 
         <h3>
+          Select Payment Method
+        </h3>
+
+
+        <select
+          onChange={(e) =>
+            setPaymentMethod(e.target.value)
+          }
+        >
+
+          <option value="">
+            Choose payment
+          </option>
+
+          <option value="PayPal">
+            PayPal
+          </option>
+
+          <option value="Capitec">
+            Capitec
+          </option>
+
+          <option value="Card">
+            Bank Card
+          </option>
+
+        </select>
+
+
+        <h3>
           Items:
         </h3>
 
@@ -58,7 +91,7 @@ export default function Checkout() {
 
 
         <button onClick={placeOrder}>
-          Place Order
+          Continue Payment
         </button>
 
 
