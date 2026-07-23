@@ -2,32 +2,29 @@
 
 import { useState } from "react";
 import { createNewProduct } from "../../../../backend/admin/products";
-import { uploadProductImage } from "../../../../backend/storage/uploadImage";
 
 export default function ProductsAdmin() {
+
   const [name, setName] = useState("");
   const [price, setPrice] = useState("");
-  const [image, setImage] = useState(null);
+  const [image, setImage] = useState("");
 
   async function addProduct() {
-    let imageUrl = "";
 
-    if (image) {
-      await uploadProductImage(image);
-      imageUrl = image.name;
-    }
-
-    createNewProduct({
+    await createNewProduct({
       name,
       price,
       category: "Streetwear",
       description: "KuroKage product",
-      image: imageUrl
+      image
     });
+
+    alert("Product added");
   }
 
   return (
     <main>
+
       <section>
         <h1>Add KuroKage Product</h1>
 
@@ -42,14 +39,16 @@ export default function ProductsAdmin() {
         />
 
         <input
-          type="file"
-          onChange={(e) => setImage(e.target.files[0])}
+          placeholder="Image URL"
+          onChange={(e) => setImage(e.target.value)}
         />
 
         <button onClick={addProduct}>
           Add Product
         </button>
+
       </section>
+
     </main>
   );
-}
+            }
