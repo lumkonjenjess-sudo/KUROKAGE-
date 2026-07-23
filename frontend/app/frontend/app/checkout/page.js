@@ -3,8 +3,10 @@
 import { useState } from "react";
 import Navbar from "../../components/Navbar";
 import { useCart } from "../../context/CartContext";
+
 import { createOrder } from "../../../backend/database/orders";
 import { processPayment } from "../../../backend/payments/providers";
+
 
 export default function Checkout() {
 
@@ -17,31 +19,42 @@ export default function Checkout() {
   async function placeOrder() {
 
     const order = await createOrder({
+
       email,
+
       items: cart,
+
       paymentMethod,
+
       status: "pending"
+
     });
 
 
-    const payment = processPayment(
-      paymentMethod,
-      order
-    );
+    const payment =
+      await processPayment(
+        paymentMethod,
+        order
+      );
 
 
     console.log(payment);
 
+
     alert(
-      "Payment process started"
+      "Order created. Payment process started."
     );
+
   }
 
 
+
   return (
+
     <main>
 
       <Navbar />
+
 
       <section>
 
@@ -51,10 +64,15 @@ export default function Checkout() {
 
 
         <input
+
           placeholder="Email"
-          onChange={(e) =>
+
+          value={email}
+
+          onChange={(e)=>
             setEmail(e.target.value)
           }
+
         />
 
 
@@ -64,28 +82,37 @@ export default function Checkout() {
 
 
         <select
-          onChange={(e) =>
+
+          value={paymentMethod}
+
+          onChange={(e)=>
             setPaymentMethod(e.target.value)
           }
+
         >
 
           <option value="">
             Choose payment
           </option>
 
+
           <option value="PayPal">
             PayPal
           </option>
+
 
           <option value="Capitec">
             Capitec
           </option>
 
+
           <option value="Card">
             Bank Card
           </option>
 
+
         </select>
+
 
 
         <h3>
@@ -93,22 +120,34 @@ export default function Checkout() {
         </h3>
 
 
-        {cart.map((item) => (
+        {cart.map((item)=>(
 
           <p key={item.id}>
-            {item.name} x {item.quantity}
+
+            {item.name}
+            {" "}x{" "}
+            {item.quantity}
+
           </p>
 
         ))}
 
 
-        <button onClick={placeOrder}>
+
+        <button
+          onClick={placeOrder}
+        >
+
           Continue Payment
+
         </button>
 
 
       </section>
 
+
     </main>
+
   );
+
 }
