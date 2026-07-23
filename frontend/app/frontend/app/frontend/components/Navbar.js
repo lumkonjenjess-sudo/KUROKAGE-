@@ -1,14 +1,44 @@
+"use client";
+
+import Link from "next/link";
+
 export default function Navbar() {
+
   return (
     <nav>
-      <h2>KuroKage</h2>
+
+      <h2>
+        KuroKage
+      </h2>
 
       <div>
-        <a href="/">Home</a>
-        <a href="/shop">Shop</a>
-        <a href="/affiliate">Affiliate</a>
-        <a href="/community">Community</a>
+
+        <Link href="/">
+          Home
+        </Link>
+
+        <Link href="/shop">
+          Shop
+        </Link>
+
+        <Link href="/cart">
+          Cart
+        </Link>
+
+        <Link href="/affiliate">
+          Affiliate
+        </Link>
+
+        <Link href="/community">
+          Community
+        </Link>
+
+        <Link href="/admin">
+          Admin
+        </Link>
+
       </div>
+
     </nav>
   );
-}
+    }
