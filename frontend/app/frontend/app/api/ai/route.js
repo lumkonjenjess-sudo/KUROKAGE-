@@ -1,5 +1,9 @@
 import { NextResponse } from "next/server";
 
+import {
+  generateAIResponse
+} from "../../../../backend/ai/openai";
+
 
 export async function POST(request) {
 
@@ -7,19 +11,14 @@ export async function POST(request) {
     await request.json();
 
 
-  const message =
-    body.message;
+  const response =
+    await generateAIResponse(
+      body.message
+    );
 
 
-  const reply =
-    "KuroKage AI received your message: " 
-    + message;
-
-
-  return NextResponse.json({
-
-    reply
-
-  });
+  return NextResponse.json(
+    response
+  );
 
 }
