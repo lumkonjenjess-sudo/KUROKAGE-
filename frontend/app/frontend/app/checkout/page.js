@@ -4,6 +4,7 @@ import { useState } from "react";
 import Navbar from "../../components/Navbar";
 import { useCart } from "../../context/CartContext";
 import { createOrder } from "../../../backend/database/orders";
+import { processPayment } from "../../../backend/payments/providers";
 
 export default function Checkout() {
 
@@ -15,14 +16,25 @@ export default function Checkout() {
 
   async function placeOrder() {
 
-    await createOrder({
+    const order = await createOrder({
       email,
       items: cart,
       paymentMethod,
       status: "pending"
     });
 
-    alert("Order placed successfully");
+
+    const payment = processPayment(
+      paymentMethod,
+      order
+    );
+
+
+    console.log(payment);
+
+    alert(
+      "Payment process started"
+    );
   }
 
 
