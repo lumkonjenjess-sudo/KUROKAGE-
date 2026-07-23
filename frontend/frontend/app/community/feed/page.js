@@ -3,21 +3,45 @@
 import { useEffect, useState } from "react";
 import Navbar from "../../../components/Navbar";
 import { getPosts } from "../../../../backend/database/communityPosts";
+import { likePost, getPostLikes } from "../../../../backend/database/communityLikes";
 
 export default function CommunityFeed() {
 
   const [posts, setPosts] = useState([]);
+  const [likes, setLikes] = useState({});
 
-  useEffect(() => {
+  async function loadPosts() {
 
-    async function loadPosts() {
-      const data = await getPosts();
-      setPosts(data);
+    const data = await getPosts();
+
+    const likeCounts = {};
+
+    for (const post of data) {
+      likeCounts[post.id] = await getPostLikes(post.id);
     }
 
-    loadPosts();
+    setLikes(likeCounts);
+    setPosts(data);
+  }
 
+  useEffect(() => {
+    loadPosts();
   }, []);
+
+  async function handleLike(postId) {
+
+    await likePost(
+      postId,
+      "demo@kurokage.com"
+    );
+
+    const count = await getPostLikes(postId);
+
+    setLikes((current) => ({
+      ...current,
+      [postId]: count
+    }));
+  }
 
   return (
     <main>
@@ -50,8 +74,16 @@ export default function CommunityFeed() {
                 />
               )}
 
+              <p>Posted by: {post.author}</p>
+
+              <button
+                onClick={() => handleLike(post.id)}
+              >
+                ❤️ Like
+              </button>
+
               <p>
-                Posted by: {post.author}
+                Likes: {likes[post.id] || 0}
               </p>
 
             </div>
@@ -64,4 +96,4 @@ export default function CommunityFeed() {
 
     </main>
   );
-    }
+}
