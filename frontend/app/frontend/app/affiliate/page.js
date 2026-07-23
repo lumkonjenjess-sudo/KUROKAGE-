@@ -8,10 +8,16 @@ import {
   createAffiliate
 } from "../../../backend/database/affiliates";
 
+import {
+  calculateCommission
+} from "../../../backend/affiliate/commission";
+
 
 export default function AffiliateDashboard() {
 
   const [affiliate, setAffiliate] = useState(null);
+
+  const [estimatedCommission, setEstimatedCommission] = useState(0);
 
 
   async function loadAffiliate() {
@@ -20,6 +26,9 @@ export default function AffiliateDashboard() {
       await getAffiliate(
         "currentUser"
       );
+
+
+    let affiliateData;
 
 
     if (data.length === 0) {
@@ -41,20 +50,33 @@ export default function AffiliateDashboard() {
         );
 
 
-      setAffiliate(
-        newData[0]
-      );
+      affiliateData =
+        newData[0];
 
 
     } else {
 
-      setAffiliate(
-        data[0]
-      );
+      affiliateData =
+        data[0];
 
     }
 
+
+    setAffiliate(
+      affiliateData
+    );
+
+
+    setEstimatedCommission(
+
+      calculateCommission(
+        affiliateData.sales || 0
+      )
+
+    );
+
   }
+
 
 
   useEffect(() => {
@@ -85,25 +107,36 @@ export default function AffiliateDashboard() {
 
             <p>
               Referral Code:
+              {" "}
               {affiliate.referralCode}
             </p>
 
 
             <p>
               Clicks:
+              {" "}
               {affiliate.clicks}
             </p>
 
 
             <p>
               Sales:
+              {" "}
               {affiliate.sales}
             </p>
 
 
             <p>
-              Commission:
-              ${affiliate.commissions}
+              Total Commission:
+              $
+              {affiliate.commissions || 0}
+            </p>
+
+
+            <p>
+              Estimated Next Commission:
+              $
+              {estimatedCommission}
             </p>
 
 
@@ -114,8 +147,9 @@ export default function AffiliateDashboard() {
 
       </section>
 
+
     </main>
 
   );
 
-  }
+}
