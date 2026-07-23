@@ -15,6 +15,12 @@ import {
   createProfile
 } from "../../../backend/database/userProfiles";
 
+import {
+  getFollowers,
+  getFollowing,
+  followUser
+} from "../../../backend/database/follows";
+
 
 const auth = getAuth(app);
 
@@ -23,37 +29,64 @@ export default function Profile() {
 
   const [profile, setProfile] = useState(null);
 
+  const [userId, setUserId] = useState(null);
+
+  const [followers, setFollowers] = useState(0);
+
+  const [following, setFollowing] = useState(0);
+
+
+
+  async function loadProfile(uid) {
+
+    let data =
+      await getProfile(uid);
+
+
+    if (!data) {
+
+      await createProfile(
+        uid,
+        {
+          username: "KuroKage User",
+          bio: "Anime streetwear creator"
+        }
+      );
+
+
+      data =
+        await getProfile(uid);
+
+    }
+
+
+    setProfile(data);
+
+
+    setFollowers(
+      await getFollowers(uid)
+    );
+
+
+    setFollowing(
+      await getFollowing(uid)
+    );
+
+  }
+
+
 
   useEffect(() => {
 
     onAuthStateChanged(
       auth,
-      async (user) => {
+      (user) => {
 
         if (user) {
 
-          let data =
-            await getProfile(user.uid);
+          setUserId(user.uid);
 
-
-          if (!data) {
-
-            await createProfile(
-              user.uid,
-              {
-                username: user.email,
-                bio: "KuroKage creator"
-              }
-            );
-
-
-            data =
-              await getProfile(user.uid);
-
-          }
-
-
-          setProfile(data);
+          loadProfile(user.uid);
 
         }
 
@@ -61,6 +94,22 @@ export default function Profile() {
     );
 
   }, []);
+
+
+
+  async function follow() {
+
+    await followUser(
+      "currentUser",
+      userId
+    );
+
+
+    setFollowers(
+      followers + 1
+    );
+
+  }
 
 
 
@@ -93,13 +142,18 @@ export default function Profile() {
 
 
             <p>
-              Followers: {profile.followers}
+              Followers: {followers}
             </p>
 
 
             <p>
-              Following: {profile.following}
+              Following: {following}
             </p>
+
+
+            <button onClick={follow}>
+              Follow
+            </button>
 
 
           </div>
