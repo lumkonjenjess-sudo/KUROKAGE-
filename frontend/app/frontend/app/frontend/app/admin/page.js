@@ -1,9 +1,49 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Navbar from "../../components/Navbar";
 import Link from "next/link";
+import { checkAdmin } from "../../../backend/admin/adminAuth";
+
 
 export default function Admin() {
+
+  const [allowed, setAllowed] = useState(false);
+
+
+  useEffect(() => {
+
+    setAllowed(checkAdmin());
+
+  }, []);
+
+
+  if (!allowed) {
+
+    return (
+
+      <main>
+
+        <Navbar />
+
+        <section>
+
+          <h1>
+            Access Denied
+          </h1>
+
+          <p>
+            You are not authorized to view this page.
+          </p>
+
+        </section>
+
+      </main>
+
+    );
+
+  }
+
 
   return (
 
@@ -19,11 +59,6 @@ export default function Admin() {
         </h1>
 
 
-        <p>
-          Manage products, orders, users, and store settings.
-        </p>
-
-
         <Link href="/admin/products">
           <button>
             Manage Products
@@ -33,7 +68,7 @@ export default function Admin() {
 
         <Link href="/admin/orders">
           <button>
-            View Orders
+            Manage Orders
           </button>
         </Link>
 
