@@ -8,6 +8,7 @@ import {
   collection,
   getDocs,
   deleteDoc,
+  updateDoc,
   doc
 } from "firebase/firestore";
 
@@ -43,6 +44,33 @@ export default function ProductsAdmin() {
 
     await deleteDoc(
       doc(db, "products", id)
+    );
+
+    loadProducts();
+
+  }
+
+
+  async function editProduct(product) {
+
+    const newName = prompt(
+      "Product name:",
+      product.name
+    );
+
+
+    const newPrice = prompt(
+      "Price:",
+      product.price
+    );
+
+
+    await updateDoc(
+      doc(db, "products", product.id),
+      {
+        name: newName,
+        price: newPrice
+      }
     );
 
 
@@ -88,6 +116,15 @@ export default function ProductsAdmin() {
 
             <button
               onClick={() =>
+                editProduct(product)
+              }
+            >
+              Edit Product
+            </button>
+
+
+            <button
+              onClick={() =>
                 deleteProduct(product.id)
               }
             >
@@ -106,4 +143,4 @@ export default function ProductsAdmin() {
 
   );
 
-        }
+}
