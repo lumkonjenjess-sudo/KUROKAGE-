@@ -1,4 +1,18 @@
-export default function ProductCard({ name, price, image }) {
+"use client";
+
+import { useCart } from "../context/CartContext";
+
+export default function ProductCard({ name, price, image, id }) {
+
+  const { addToCart } = useCart();
+
+  const product = {
+    id,
+    name,
+    price,
+    image
+  };
+
   return (
     <div className="product-card">
 
@@ -18,7 +32,9 @@ export default function ProductCard({ name, price, image }) {
         View Product
       </button>
 
-      <button>
+      <button
+        onClick={() => addToCart(product)}
+      >
         Add to Cart
       </button>
 
