@@ -3,10 +3,6 @@
 import { useState } from "react";
 import Navbar from "../../components/Navbar";
 
-import {
-  askKuroKageAI
-} from "../../../backend/ai/kurokageAI";
-
 
 export default function AIChat() {
 
@@ -14,19 +10,46 @@ export default function AIChat() {
 
   const [reply, setReply] = useState("");
 
+  const [loading, setLoading] = useState(false);
+
 
 
   async function sendMessage() {
 
+    setLoading(true);
+
+
     const response =
-      await askKuroKageAI(
-        message
-      );
+      await fetch("/api/ai", {
+
+        method: "POST",
+
+        headers: {
+
+          "Content-Type":
+            "application/json"
+
+        },
+
+        body: JSON.stringify({
+
+          message
+
+        })
+
+      });
+
+
+    const data =
+      await response.json();
 
 
     setReply(
-      response.reply
+      data.reply
     );
+
+
+    setLoading(false);
 
   }
 
@@ -50,6 +73,8 @@ export default function AIChat() {
 
           placeholder="Ask KuroKage AI..."
 
+          value={message}
+
           onChange={(e)=>
             setMessage(
               e.target.value
@@ -62,7 +87,11 @@ export default function AIChat() {
         <button
           onClick={sendMessage}
         >
-          Send
+
+          {loading
+            ? "Thinking..."
+            : "Send"}
+
         </button>
 
 
@@ -78,4 +107,4 @@ export default function AIChat() {
 
   );
 
-            }
+}
