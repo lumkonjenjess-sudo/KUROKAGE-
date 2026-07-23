@@ -13,6 +13,9 @@ export default function Shop() {
     getProducts()
       .then((data) => {
         setProducts(data);
+      })
+      .catch((error) => {
+        console.log("Error loading products:", error);
       });
   }, []);
 
@@ -27,13 +30,18 @@ export default function Shop() {
           Explore the Shadow Collection
         </p>
 
-        {products.map((product) => (
-          <ProductCard
-            key={product.id}
-            name={product.name}
-            price={product.price}
-          />
-        ))}
+        {products.length === 0 ? (
+          <p>No products available yet.</p>
+        ) : (
+          products.map((product) => (
+            <ProductCard
+              key={product.id}
+              name={product.name}
+              price={product.price}
+              image={product.image}
+            />
+          ))
+        )}
 
       </section>
     </main>
