@@ -9,32 +9,73 @@ export function CartProvider({ children }) {
   const [cart, setCart] = useState([]);
 
   function addToCart(product) {
-    setCart((currentCart) => [
-      ...currentCart,
-      product
-    ]);
+
+    const existing = cart.find(
+      (item) => item.id === product.id
+    );
+
+    if (existing) {
+      setCart(
+        cart.map((item) =>
+          item.id === product.id
+            ? {
+                ...item,
+                quantity: item.quantity + 1
+              }
+            : item
+        )
+      );
+    } else {
+      setCart([
+        ...cart,
+        {
+          ...product,
+          quantity: 1
+        }
+      ]);
+    }
   }
 
+
   function removeFromCart(id) {
-    setCart((currentCart) =>
-      currentCart.filter(
+    setCart(
+      cart.filter(
         (item) => item.id !== id
       )
     );
   }
+
+
+  function updateQuantity(id, quantity) {
+
+    setCart(
+      cart.map((item) =>
+        item.id === id
+          ? {
+              ...item,
+              quantity
+            }
+          : item
+      )
+    );
+
+  }
+
 
   return (
     <CartContext.Provider
       value={{
         cart,
         addToCart,
-        removeFromCart
+        removeFromCart,
+        updateQuantity
       }}
     >
       {children}
     </CartContext.Provider>
   );
 }
+
 
 export function useCart() {
   return useContext(CartContext);
