@@ -8,38 +8,72 @@ import {
   createMembership
 } from "../../../backend/database/memberships";
 
+import {
+  getBenefits
+} from "../../../backend/shadow/benefits";
+
+
 export default function ShadowSociety() {
 
   const [member, setMember] = useState(null);
 
+  const [benefits, setBenefits] = useState([]);
+
+
+
   async function loadMembership() {
 
-    const data = await getMembership(
-      "currentUser"
-    );
+    const data =
+      await getMembership(
+        "currentUser"
+      );
+
+
+    let currentMember;
+
 
     if (data.length === 0) {
 
       await createMembership({
 
-        userId: "currentUser"
+        userId:
+          "currentUser"
 
       });
+
 
       const newData =
         await getMembership(
           "currentUser"
         );
 
-      setMember(newData[0]);
+
+      currentMember =
+        newData[0];
+
 
     } else {
 
-      setMember(data[0]);
+      currentMember =
+        data[0];
 
     }
 
+
+    setMember(
+      currentMember
+    );
+
+
+    setBenefits(
+      getBenefits(
+        currentMember.tier
+      )
+    );
+
   }
+
+
 
   useEffect(() => {
 
@@ -47,11 +81,14 @@ export default function ShadowSociety() {
 
   }, []);
 
+
+
   return (
 
     <main>
 
       <Navbar />
+
 
       <section>
 
@@ -59,27 +96,49 @@ export default function ShadowSociety() {
           Shadow Society
         </h1>
 
+
         {member && (
 
           <div>
 
             <p>
-              Membership Tier: {member.tier}
+              Membership Tier:
+              {" "}
+              {member.tier}
             </p>
 
-            <p>
-              Loyalty Points: {member.points}
-            </p>
 
             <p>
-              Welcome to the exclusive KuroKage community.
+              Loyalty Points:
+              {" "}
+              {member.points}
             </p>
+
+
+            <h2>
+              Member Benefits
+            </h2>
+
+
+            {benefits.map(
+              (benefit, index) => (
+
+                <p key={index}>
+                  ✓ {benefit}
+                </p>
+
+              )
+
+            )}
+
 
           </div>
 
         )}
 
+
       </section>
+
 
     </main>
 
