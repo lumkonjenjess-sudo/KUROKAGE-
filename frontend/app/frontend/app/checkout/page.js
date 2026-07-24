@@ -21,6 +21,10 @@ import {
   getMembership
 } from "../../../backend/database/memberships";
 
+import {
+  rewardPurchase
+} from "../../../backend/shadow/orderRewards";
+
 
 export default function Checkout() {
 
@@ -31,6 +35,10 @@ export default function Checkout() {
   const [paymentMethod, setPaymentMethod] = useState("");
 
   const [memberTier, setMemberTier] = useState("Shadow");
+
+  const [membershipId, setMembershipId] = useState("");
+
+  const [pointsEarned, setPointsEarned] = useState(0);
 
 
 
@@ -46,6 +54,11 @@ export default function Checkout() {
 
       setMemberTier(
         data[0].tier
+      );
+
+
+      setMembershipId(
+        data[0].id
       );
 
     }
@@ -120,11 +133,29 @@ export default function Checkout() {
       );
 
 
+
+    if (membershipId) {
+
+      const reward =
+        await rewardPurchase(
+          membershipId,
+          finalTotal
+        );
+
+
+      setPointsEarned(
+        reward.pointsEarned
+      );
+
+    }
+
+
+
     console.log(payment);
 
 
     alert(
-      "Order created. Payment process started."
+      "Order created. Points added to your Shadow Society account."
     );
 
   }
@@ -167,6 +198,15 @@ export default function Checkout() {
         </h3>
 
 
+        {pointsEarned > 0 && (
+
+          <p>
+            You earned {pointsEarned} Shadow Society points!
+          </p>
+
+        )}
+
+
         <h3>
           Items:
         </h3>
@@ -206,7 +246,6 @@ export default function Checkout() {
         </h2>
 
 
-
         <h3>
           Select Payment Method
         </h3>
@@ -214,50 +253,4 @@ export default function Checkout() {
 
         <select
 
-          value={paymentMethod}
-
-          onChange={(e)=>
-            setPaymentMethod(
-              e.target.value
-            )
-          }
-
-        >
-
-          <option value="">
-            Choose payment
-          </option>
-
-          <option value="PayPal">
-            PayPal
-          </option>
-
-          <option value="Capitec">
-            Capitec
-          </option>
-
-          <option value="Card">
-            Bank Card
-          </option>
-
-        </select>
-
-
-
-        <button
-          onClick={placeOrder}
-        >
-
-          Continue Payment
-
-        </button>
-
-
-      </section>
-
-
-    </main>
-
-  );
-
-}
+         
