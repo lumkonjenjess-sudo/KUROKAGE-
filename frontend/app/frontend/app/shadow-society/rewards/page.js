@@ -11,12 +11,21 @@ import {
   getAvailableRewards
 } from "../../../../backend/shadow/rewards";
 
+import {
+  redeemReward
+} from "../../../../backend/shadow/redeem";
+
 
 export default function Rewards() {
 
   const [rewards, setRewards] = useState([]);
 
   const [points, setPoints] = useState(0);
+
+  const [membershipId, setMembershipId] = useState("");
+
+  const [message, setMessage] = useState("");
+
 
 
   async function loadRewards() {
@@ -31,6 +40,11 @@ export default function Rewards() {
 
       const member =
         data[0];
+
+
+      setMembershipId(
+        member.id
+      );
 
 
       setPoints(
@@ -49,11 +63,45 @@ export default function Rewards() {
   }
 
 
+
+  async function handleRedeem(
+    rewardId
+  ) {
+
+    const result =
+      await redeemReward(
+        membershipId,
+        rewardId
+      );
+
+
+    if (result.success) {
+
+      setMessage(
+        result.reward + " redeemed successfully!"
+      );
+
+
+      loadRewards();
+
+    } else {
+
+      setMessage(
+        result.message
+      );
+
+    }
+
+  }
+
+
+
   useEffect(() => {
 
     loadRewards();
 
   }, []);
+
 
 
   return (
@@ -72,6 +120,11 @@ export default function Rewards() {
 
         <p>
           Your Points: {points}
+        </p>
+
+
+        <p>
+          {message}
         </p>
 
 
@@ -96,8 +149,16 @@ export default function Rewards() {
             </p>
 
 
-            <button>
+            <button
+              onClick={() =>
+                handleRedeem(
+                  reward.id
+                )
+              }
+            >
+
               Redeem Reward
+
             </button>
 
 
