@@ -1,3 +1,8 @@
+import {
+  recommendProducts
+} from "./recommendations";
+
+
 export async function generateAIResponse(
   message
 ) {
@@ -6,24 +11,34 @@ export async function generateAIResponse(
     process.env.OPENAI_API_KEY;
 
 
+  const recommendations =
+    await recommendProducts(
+      message
+    );
+
+
   if (!apiKey) {
 
     return {
 
       reply:
-        "KuroKage AI is currently in setup mode."
+        "KuroKage AI is currently running in demo mode. Here are some products you might like.",
+
+      recommendations
 
     };
 
   }
 
 
-  // OpenAI API connection will be added here
+  // OpenAI integration will be added here
 
   return {
 
     reply:
-      "KuroKage AI received: " + message
+      "KuroKage AI received: " + message,
+
+    recommendations
 
   };
 
