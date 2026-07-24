@@ -4,22 +4,20 @@ import { useState } from "react";
 import Navbar from "../../components/Navbar";
 import { useCart } from "../../context/CartContext";
 
-
 export default function AIChat() {
 
   const { addToCart } = useCart();
 
+  const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
   const [reply, setReply] = useState("");
+  const [orders, setOrders] = useState([]);
   const [recommendations, setRecommendations] = useState([]);
   const [loading, setLoading] = useState(false);
-
-
 
   async function sendMessage() {
 
     setLoading(true);
-
 
     const response = await fetch("/api/ai", {
 
@@ -30,58 +28,42 @@ export default function AIChat() {
       },
 
       body: JSON.stringify({
+        email,
         message
       })
 
     });
 
+    const data = await response.json();
 
-    const data =
-      await response.json();
-
-
-    setReply(
-      data.reply
-    );
-
+    setReply(data.reply);
 
     setRecommendations(
       data.recommendations || []
     );
 
+    setOrders(
+      data.orders || []
+    );
 
     setLoading(false);
 
   }
 
-
-
   function addRecommendedProduct(product) {
 
     addToCart({
 
-      id:
-        product.name,
-
-      name:
-        product.name,
-
-      category:
-        product.category,
-
-      price:
-        product.price
+      id: product.id || product.name,
+      name: product.name,
+      category: product.category,
+      price: product.price
 
     });
 
-
-    alert(
-      product.name + " added to cart"
-    );
+    alert(product.name + " added to cart");
 
   }
-
-
 
   return (
 
@@ -89,60 +71,77 @@ export default function AIChat() {
 
       <Navbar />
 
-
       <section>
 
         <h1>
           KuroKage AI Assistant
         </h1>
 
-
         <input
-
-          placeholder="Ask KuroKage AI..."
-
-          value={message}
-
-          onChange={(e)=>
-            setMessage(
-              e.target.value
-            )
+          placeholder="Email (for order tracking)"
+          value={email}
+          onChange={(e) =>
+            setEmail(e.target.value)
           }
-
         />
 
+        <input
+          placeholder="Ask KuroKage AI..."
+          value={message}
+          onChange={(e) =>
+            setMessage(e.target.value)
+          }
+        />
 
-        <button
-          onClick={sendMessage}
-        >
+        <button onClick={sendMessage}>
 
-          {loading
-            ? "Thinking..."
-            : "Send"}
+          {loading ? "Thinking..." : "Send"}
 
         </button>
-
-
 
         <h3>
           AI Response
         </h3>
 
+        <p>{reply}</p>
 
-        <p>
-          {reply}
-        </p>
+        {orders.length > 0 && (
 
+          <>
 
+            <h3>
+              Your Orders
+            </h3>
+
+            {orders.map((order) => (
+
+              <div key={order.id}>
+
+                <p>
+                  Order: {order.id}
+                </p>
+
+                <p>
+                  Status: {order.status}
+                </p>
+
+                <p>
+                  Payment: {order.payment}
+                </p>
+
+              </div>
+
+            ))}
+
+          </>
+
+        )}
 
         <h3>
           Recommended Products
         </h3>
 
-
-
-        {recommendations.map(
-          (product, index)=>(
+        {recommendations.map((product, index) => (
 
           <div key={index}>
 
@@ -150,42 +149,30 @@ export default function AIChat() {
               {product.name}
             </h4>
 
-
             <p>
-              Category:
-              {" "}
-              {product.category}
+              Category: {product.category}
             </p>
 
-
             <p>
-              Price:
-              {" "}
-              {product.price}
+              Price: {product.price}
             </p>
-
 
             <button
               onClick={() =>
                 addRecommendedProduct(product)
               }
             >
-
               Add to Cart
-
             </button>
-
 
           </div>
 
         ))}
 
-
       </section>
-
 
     </main>
 
   );
 
-            }
+}
