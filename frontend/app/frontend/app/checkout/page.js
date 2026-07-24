@@ -1,16 +1,25 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Navbar from "../../components/Navbar";
 import { useCart } from "../../context/CartContext";
 
-import { createOrder } from "../../../backend/database/orders";
-import { processPayment } from "../../../backend/payments/providers";
+import {
+  createOrder
+} from "../../../backend/database/orders";
+
+import {
+  processPayment
+} from "../../../backend/payments/providers";
 
 import {
   getMemberDiscount,
   applyDiscount
 } from "../../../backend/shadow/discounts";
+
+import {
+  getMembership
+} from "../../../backend/database/memberships";
 
 
 export default function Checkout() {
@@ -18,9 +27,39 @@ export default function Checkout() {
   const { cart } = useCart();
 
   const [email, setEmail] = useState("");
+
   const [paymentMethod, setPaymentMethod] = useState("");
 
   const [memberTier, setMemberTier] = useState("Shadow");
+
+
+
+  async function loadMemberTier() {
+
+    const data =
+      await getMembership(
+        "currentUser"
+      );
+
+
+    if (data.length > 0) {
+
+      setMemberTier(
+        data[0].tier
+      );
+
+    }
+
+  }
+
+
+
+  useEffect(() => {
+
+    loadMemberTier();
+
+  }, []);
+
 
 
   const total =
@@ -56,11 +95,13 @@ export default function Checkout() {
 
         paymentMethod,
 
+        membershipTier:
+          memberTier,
+
         originalTotal:
           total,
 
-        discount:
-          discount,
+        discount,
 
         total:
           finalTotal,
@@ -111,48 +152,19 @@ export default function Checkout() {
           value={email}
 
           onChange={(e)=>
-            setEmail(e.target.value)
+            setEmail(
+              e.target.value
+            )
           }
 
         />
 
 
         <h3>
-          Shadow Society Tier
+          Shadow Society Tier:
+          {" "}
+          {memberTier}
         </h3>
-
-
-        <select
-
-          value={memberTier}
-
-          onChange={(e)=>
-            setMemberTier(e.target.value)
-          }
-
-        >
-
-          <option value="Shadow">
-            Shadow
-          </option>
-
-          <option value="Bronze">
-            Bronze
-          </option>
-
-          <option value="Silver">
-            Silver
-          </option>
-
-          <option value="Gold">
-            Gold
-          </option>
-
-          <option value="Shadow Elite">
-            Shadow Elite
-          </option>
-
-        </select>
 
 
         <h3>
@@ -174,17 +186,23 @@ export default function Checkout() {
 
 
         <h3>
-          Original Total: £{total.toFixed(2)}
+          Original Total:
+          {" "}
+          £{total.toFixed(2)}
         </h3>
 
 
         <h3>
-          Discount: {discount}%
+          Member Discount:
+          {" "}
+          {discount}%
         </h3>
 
 
         <h2>
-          Final Total: £{finalTotal.toFixed(2)}
+          Final Total:
+          {" "}
+          £{finalTotal.toFixed(2)}
         </h2>
 
 
@@ -199,7 +217,9 @@ export default function Checkout() {
           value={paymentMethod}
 
           onChange={(e)=>
-            setPaymentMethod(e.target.value)
+            setPaymentMethod(
+              e.target.value
+            )
           }
 
         >
