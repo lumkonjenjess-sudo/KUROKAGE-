@@ -7,6 +7,11 @@ import { useCart } from "../../context/CartContext";
 import { createOrder } from "../../../backend/database/orders";
 import { processPayment } from "../../../backend/payments/providers";
 
+import {
+  getMemberDiscount,
+  applyDiscount
+} from "../../../backend/shadow/discounts";
+
 
 export default function Checkout() {
 
@@ -15,20 +20,56 @@ export default function Checkout() {
   const [email, setEmail] = useState("");
   const [paymentMethod, setPaymentMethod] = useState("");
 
+  const [memberTier, setMemberTier] = useState("Shadow");
+
+
+  const total =
+    cart.reduce(
+      (sum, item) =>
+        sum + (item.price * item.quantity),
+      0
+    );
+
+
+  const discount =
+    getMemberDiscount(
+      memberTier
+    );
+
+
+  const finalTotal =
+    applyDiscount(
+      total,
+      discount
+    );
+
+
 
   async function placeOrder() {
 
-    const order = await createOrder({
+    const order =
+      await createOrder({
 
-      email,
+        email,
 
-      items: cart,
+        items: cart,
 
-      paymentMethod,
+        paymentMethod,
 
-      status: "pending"
+        originalTotal:
+          total,
 
-    });
+        discount:
+          discount,
+
+        total:
+          finalTotal,
+
+        status:
+          "pending"
+
+      });
+
 
 
     const payment =
@@ -77,42 +118,41 @@ export default function Checkout() {
 
 
         <h3>
-          Select Payment Method
+          Shadow Society Tier
         </h3>
 
 
         <select
 
-          value={paymentMethod}
+          value={memberTier}
 
           onChange={(e)=>
-            setPaymentMethod(e.target.value)
+            setMemberTier(e.target.value)
           }
 
         >
 
-          <option value="">
-            Choose payment
+          <option value="Shadow">
+            Shadow
           </option>
 
-
-          <option value="PayPal">
-            PayPal
+          <option value="Bronze">
+            Bronze
           </option>
 
-
-          <option value="Capitec">
-            Capitec
+          <option value="Silver">
+            Silver
           </option>
 
-
-          <option value="Card">
-            Bank Card
+          <option value="Gold">
+            Gold
           </option>
 
+          <option value="Shadow Elite">
+            Shadow Elite
+          </option>
 
         </select>
-
 
 
         <h3>
@@ -131,6 +171,56 @@ export default function Checkout() {
           </p>
 
         ))}
+
+
+        <h3>
+          Original Total: £{total.toFixed(2)}
+        </h3>
+
+
+        <h3>
+          Discount: {discount}%
+        </h3>
+
+
+        <h2>
+          Final Total: £{finalTotal.toFixed(2)}
+        </h2>
+
+
+
+        <h3>
+          Select Payment Method
+        </h3>
+
+
+        <select
+
+          value={paymentMethod}
+
+          onChange={(e)=>
+            setPaymentMethod(e.target.value)
+          }
+
+        >
+
+          <option value="">
+            Choose payment
+          </option>
+
+          <option value="PayPal">
+            PayPal
+          </option>
+
+          <option value="Capitec">
+            Capitec
+          </option>
+
+          <option value="Card">
+            Bank Card
+          </option>
+
+        </select>
 
 
 
