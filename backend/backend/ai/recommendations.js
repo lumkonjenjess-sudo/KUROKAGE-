@@ -1,62 +1,43 @@
-export async function recommendProducts(message) {
-
-  const recommendations = [];
-
-  const query = message.toLowerCase();
-
-  if (
-    query.includes("hoodie") ||
-    query.includes("warm")
-  ) {
-
-    recommendations.push({
-      name: "Shadow Raven Hoodie",
-      category: "Hoodies",
-      price: 49.99
-    });
-
-  }
+import {
+  searchProducts
+} from "../database/products";
 
 
-  if (
-    query.includes("shirt") ||
-    query.includes("t-shirt") ||
-    query.includes("tee")
-  ) {
+export async function recommendProducts(
+  message
+) {
 
-    recommendations.push({
-      name: "KuroKage Shadow Tee",
-      category: "T-Shirts",
-      price: 29.99
-    });
+  const products =
+    await searchProducts(
+      message
+    );
+
+
+  if (products.length > 0) {
+
+    return products.slice(
+      0,
+      5
+    );
 
   }
 
 
-  if (
-    query.includes("jacket")
-  ) {
+  return [
 
-    recommendations.push({
-      name: "Nightfall Tech Jacket",
-      category: "Jackets",
-      price: 79.99
-    });
+    {
 
-  }
+      name:
+        "KuroKage Featured Collection",
 
+      category:
+        "Featured",
 
-  if (recommendations.length === 0) {
+      price:
+        "Browse Store"
 
-    recommendations.push({
-      name: "KuroKage Featured Collection",
-      category: "Featured",
-      price: "Browse Store"
-    });
+    }
 
-  }
-
-
-  return recommendations;
+  ];
 
 }
