@@ -11,22 +11,46 @@ export async function createOutfit(
     await getProducts();
 
 
-  const outfit =
-    products
-      .filter(product =>
+  const search =
+    style.toLowerCase();
 
-        product.category ||
-        product.name
 
-      )
-      .slice(0, 4);
+  let outfit =
+    products.filter(product =>
+
+      product.name
+        ?.toLowerCase()
+        .includes(search)
+
+      ||
+
+      product.category
+        ?.toLowerCase()
+        .includes(search)
+
+      ||
+
+      product.description
+        ?.toLowerCase()
+        .includes(search)
+
+    );
+
+
+  if (outfit.length === 0) {
+
+    outfit =
+      products.slice(0, 4);
+
+  }
 
 
   return {
 
     style,
 
-    outfit
+    outfit:
+      outfit.slice(0, 4)
 
   };
 
