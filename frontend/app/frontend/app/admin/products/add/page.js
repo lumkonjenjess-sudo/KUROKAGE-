@@ -20,7 +20,11 @@ export default function AddProduct() {
 
     description: "",
 
-    image: ""
+    image: "",
+
+    stock: 0,
+
+    available: true
 
   });
 
@@ -53,6 +57,9 @@ export default function AddProduct() {
       price:
         Number(product.price),
 
+      stock:
+        Number(product.stock),
+
       createdAt:
         new Date()
 
@@ -62,6 +69,25 @@ export default function AddProduct() {
     alert(
       "Product added successfully"
     );
+
+
+    setProduct({
+
+      name: "",
+
+      category: "",
+
+      price: "",
+
+      description: "",
+
+      image: "",
+
+      stock: 0,
+
+      available: true
+
+    });
 
   }
 
@@ -82,53 +108,76 @@ export default function AddProduct() {
 
 
         <input
+
           placeholder="Product Name"
+
+          value={product.name}
+
           onChange={(e)=>
             updateField(
               "name",
               e.target.value
             )
           }
+
         />
 
 
         <input
+
           placeholder="Category"
+
+          value={product.category}
+
           onChange={(e)=>
             updateField(
               "category",
               e.target.value
             )
           }
+
         />
 
 
         <input
+
           placeholder="Price"
+
           type="number"
+
+          value={product.price}
+
           onChange={(e)=>
             updateField(
               "price",
               e.target.value
             )
           }
+
         />
 
 
         <input
+
           placeholder="Image URL"
+
+          value={product.image}
+
           onChange={(e)=>
             updateField(
               "image",
               e.target.value
             )
           }
+
         />
 
 
         <textarea
 
           placeholder="Description"
+
+          value={product.description}
 
           onChange={(e)=>
             updateField(
@@ -140,8 +189,51 @@ export default function AddProduct() {
         />
 
 
+        <input
+
+          placeholder="Stock Quantity"
+
+          type="number"
+
+          value={product.stock}
+
+          onChange={(e)=>
+            updateField(
+              "stock",
+              Number(e.target.value)
+            )
+          }
+
+        />
+
+
+        <label>
+
+          <input
+
+            type="checkbox"
+
+            checked={product.available}
+
+            onChange={(e)=>
+              updateField(
+                "available",
+                e.target.checked
+              )
+            }
+
+          />
+
+          Product Available
+
+        </label>
+
+
+
         <button
+
           onClick={saveProduct}
+
         >
 
           Save Product
@@ -156,4 +248,4 @@ export default function AddProduct() {
 
   );
 
-}
+              }
