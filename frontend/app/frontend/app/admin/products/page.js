@@ -2,14 +2,18 @@
 
 import { useEffect, useState } from "react";
 import Navbar from "../../../components/Navbar";
+import Link from "next/link";
 
 import {
-  getProducts
+  getProducts,
+  deleteProduct
 } from "../../../../backend/database/products";
+
 
 export default function AdminProducts() {
 
   const [products, setProducts] = useState([]);
+
 
   async function loadProducts() {
 
@@ -20,11 +24,28 @@ export default function AdminProducts() {
 
   }
 
+
   useEffect(() => {
 
     loadProducts();
 
   }, []);
+
+
+
+  async function removeProduct(id) {
+
+    await deleteProduct(id);
+
+    alert(
+      "Product deleted"
+    );
+
+    loadProducts();
+
+  }
+
+
 
   return (
 
@@ -32,19 +53,27 @@ export default function AdminProducts() {
 
       <Navbar />
 
+
       <section>
 
         <h1>
           Product Management
         </h1>
 
-        <button>
-          Add Product
-        </button>
+
+        <Link href="/admin/products/add">
+
+          <button>
+            Add Product
+          </button>
+
+        </Link>
+
 
         <h2>
           Store Products
         </h2>
+
 
         {products.length === 0 ? (
 
@@ -54,29 +83,55 @@ export default function AdminProducts() {
 
         ) : (
 
-          products.map((product) => (
+          products.map((product)=>(
 
             <div key={product.id}>
+
 
               <h3>
                 {product.name}
               </h3>
 
-              <p>
-                Category: {product.category}
-              </p>
 
               <p>
-                Price: £{product.price}
+                Category:
+                {" "}
+                {product.category}
               </p>
 
-              <button>
-                Edit
-              </button>
 
-              <button>
+              <p>
+                Price:
+                {" "}
+                £{product.price}
+              </p>
+
+
+              <Link
+                href={`/admin/products/edit/${product.id}`}
+              >
+
+                <button>
+                  Edit
+                </button>
+
+              </Link>
+
+
+              <button
+
+                onClick={() =>
+                  removeProduct(
+                    product.id
+                  )
+                }
+
+              >
+
                 Delete
+
               </button>
+
 
             </div>
 
@@ -84,10 +139,12 @@ export default function AdminProducts() {
 
         )}
 
+
       </section>
+
 
     </main>
 
   );
 
-}
+                  }
