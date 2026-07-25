@@ -7,11 +7,17 @@ import {
   getMemberAnalytics
 } from "../../../../backend/shadow/analytics";
 
+import {
+  getAchievements
+} from "../../../../backend/shadow/achievements";
+
 export default function Analytics() {
 
   const [email, setEmail] = useState("");
 
   const [stats, setStats] = useState(null);
+
+  const [achievements, setAchievements] = useState([]);
 
 
   async function loadAnalytics() {
@@ -22,6 +28,10 @@ export default function Analytics() {
       );
 
     setStats(data);
+
+    setAchievements(
+      getAchievements(data)
+    );
 
   }
 
@@ -39,17 +49,11 @@ export default function Analytics() {
         </h1>
 
         <input
-
           placeholder="Enter your email"
-
           value={email}
-
           onChange={(e)=>
-            setEmail(
-              e.target.value
-            )
+            setEmail(e.target.value)
           }
-
         />
 
         <button
@@ -78,6 +82,36 @@ export default function Analytics() {
               Loyalty Points: {stats.totalPoints}
             </p>
 
+            <h2>
+              Achievements
+            </h2>
+
+            {achievements.length === 0 ? (
+
+              <p>
+                No achievements unlocked yet.
+              </p>
+
+            ) : (
+
+              achievements.map((achievement) => (
+
+                <div key={achievement.id}>
+
+                  <h3>
+                    {achievement.name}
+                  </h3>
+
+                  <p>
+                    {achievement.description}
+                  </p>
+
+                </div>
+
+              ))
+
+            )}
+
           </div>
 
         )}
@@ -88,4 +122,4 @@ export default function Analytics() {
 
   );
 
-}
+        }
