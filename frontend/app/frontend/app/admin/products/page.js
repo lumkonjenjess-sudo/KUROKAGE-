@@ -14,6 +14,9 @@ export default function AdminProducts() {
 
   const [products, setProducts] = useState([]);
 
+  const [search, setSearch] = useState("");
+
+
 
   async function loadProducts() {
 
@@ -23,6 +26,7 @@ export default function AdminProducts() {
     setProducts(data);
 
   }
+
 
 
   useEffect(() => {
@@ -44,6 +48,27 @@ export default function AdminProducts() {
     loadProducts();
 
   }
+
+
+
+  const filteredProducts =
+    products.filter((product) =>
+
+      product.name
+        ?.toLowerCase()
+        .includes(
+          search.toLowerCase()
+        )
+
+      ||
+
+      product.category
+        ?.toLowerCase()
+        .includes(
+          search.toLowerCase()
+        )
+
+    );
 
 
 
@@ -70,74 +95,112 @@ export default function AdminProducts() {
         </Link>
 
 
+
+        <input
+
+          placeholder="Search products..."
+
+          value={search}
+
+          onChange={(e)=>
+            setSearch(
+              e.target.value
+            )
+          }
+
+        />
+
+
+
         <h2>
-          Store Products
+          Store Inventory
         </h2>
 
 
-        {products.length === 0 ? (
 
-          <p>
-            No products found.
-          </p>
+        {filteredProducts.map((product)=>(
 
-        ) : (
-
-          products.map((product)=>(
-
-            <div key={product.id}>
+          <div key={product.id}>
 
 
-              <h3>
-                {product.name}
-              </h3>
+            <h3>
+              {product.name}
+            </h3>
 
+
+            <p>
+              Category:
+              {" "}
+              {product.category}
+            </p>
+
+
+            <p>
+              Price:
+              {" "}
+              £{product.price}
+            </p>
+
+
+            <p>
+              Stock:
+              {" "}
+              {product.stock ?? 0}
+            </p>
+
+
+            <p>
+
+              Status:
+              {" "}
+
+              {product.available
+                ? "Available"
+                : "Out of Stock"}
+
+            </p>
+
+
+            {(product.stock ?? 0) <= 5 && (
 
               <p>
-                Category:
-                {" "}
-                {product.category}
+                ⚠️ Low Stock Alert
               </p>
 
-
-              <p>
-                Price:
-                {" "}
-                £{product.price}
-              </p>
+            )}
 
 
-              <Link
-                href={`/admin/products/edit/${product.id}`}
-              >
 
-                <button>
-                  Edit
-                </button>
+            <Link
+              href={`/admin/products/edit/${product.id}`}
+            >
 
-              </Link>
-
-
-              <button
-
-                onClick={() =>
-                  removeProduct(
-                    product.id
-                  )
-                }
-
-              >
-
-                Delete
-
+              <button>
+                Edit
               </button>
 
+            </Link>
 
-            </div>
 
-          ))
 
-        )}
+            <button
+
+              onClick={() =>
+                removeProduct(
+                  product.id
+                )
+              }
+
+            >
+
+              Delete
+
+            </button>
+
+
+          </div>
+
+        ))}
 
 
       </section>
@@ -147,4 +210,4 @@ export default function AdminProducts() {
 
   );
 
-                  }
+}
