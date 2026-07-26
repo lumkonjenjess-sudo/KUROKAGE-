@@ -6,6 +6,11 @@ import {
   getOrders
 } from "../database/orders";
 
+import {
+  generateAIResponse
+} from "./openai";
+
+
 
 export async function askAdminAI(
   task
@@ -38,93 +43,51 @@ export async function askAdminAI(
 
 
 
-  const query =
-    task.toLowerCase();
+  const storeData = {
+
+    revenue,
+
+    totalOrders:
+      orders.length,
+
+    totalProducts:
+      products.length,
+
+    lowStockProducts:
+      lowStock.map(
+        product => product.name
+      )
+
+  };
 
 
 
-  let response =
-    "KuroKage AI Admin analysed your store. ";
+  const aiResponse =
+    await generateAIResponse(
 
+      `You are KuroKage Admin AI.
 
+      Analyse this business request:
+      ${task}
 
-  if (
-    query.includes("sales") ||
-    query.includes("revenue")
-  ) {
+      Provide practical ecommerce advice.`,
 
-    response +=
+      storeData
 
-      `Your current revenue is £${revenue.toFixed(2)} from ${orders.length} orders.`;
-
-  }
-
-
-  else if (
-    query.includes("inventory") ||
-    query.includes("stock")
-  ) {
-
-    response +=
-
-      `${lowStock.length} products have low stock and may require restocking.`;
-
-  }
-
-
-  else if (
-    query.includes("product")
-  ) {
-
-    response +=
-
-      `Your store currently has ${products.length} products.`;
-
-  }
-
-
-  else if (
-    query.includes("order")
-  ) {
-
-    response +=
-
-      `Your store currently has ${orders.length} orders.`;
-
-  }
-
-
-  else {
-
-    response +=
-
-      "I can help analyse sales, inventory, products, and orders.";
-
-  }
+    );
 
 
 
   return {
 
-    task,
+    response:
+      aiResponse.response,
 
-    response,
 
-    analytics: {
-
-      revenue,
-
-      totalOrders:
-        orders.length,
-
-      totalProducts:
-        products.length,
-
-      lowStock:
-        lowStock.length
-
-    }
+    analytics:
+      storeData
 
   };
+
 
 }
