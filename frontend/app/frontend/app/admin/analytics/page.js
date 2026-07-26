@@ -15,7 +15,6 @@ import {
 export default function AnalyticsDashboard() {
 
   const [orders, setOrders] = useState([]);
-
   const [products, setProducts] = useState([]);
 
 
@@ -28,7 +27,6 @@ export default function AnalyticsDashboard() {
       await getProducts();
 
     setOrders(orderData);
-
     setProducts(productData);
 
   }
@@ -57,15 +55,46 @@ export default function AnalyticsDashboard() {
     ).size;
 
 
-  const totalProducts =
-    products.length;
-
-
   const completedOrders =
     orders.filter(
       order =>
         order.orderStatus === "completed"
     ).length;
+
+
+  const pendingOrders =
+    orders.filter(
+      order =>
+        order.orderStatus === "pending"
+    ).length;
+
+
+  const processingOrders =
+    orders.filter(
+      order =>
+        order.orderStatus === "processing"
+    ).length;
+
+
+  const shippedOrders =
+    orders.filter(
+      order =>
+        order.orderStatus === "shipped"
+    ).length;
+
+
+  const cancelledOrders =
+    orders.filter(
+      order =>
+        order.orderStatus === "cancelled"
+    ).length;
+
+
+  const lowStockProducts =
+    products.filter(
+      product =>
+        (product.stock ?? 0) <= 5
+    );
 
 
   return (
@@ -77,68 +106,88 @@ export default function AnalyticsDashboard() {
       <section>
 
         <h1>
-          Business Analytics
+          KuroKage Business Analytics
         </h1>
 
-        <div>
+        <h2>
+          Sales Overview
+        </h2>
 
-          <h2>
-            £{revenue.toFixed(2)}
-          </h2>
+        <p>
+          Revenue: £{revenue.toFixed(2)}
+        </p>
 
-          <p>
-            Total Revenue
-          </p>
+        <p>
+          Total Orders: {orders.length}
+        </p>
 
-        </div>
+        <p>
+          Customers: {customers}
+        </p>
 
-        <div>
+        <p>
+          Products: {products.length}
+        </p>
 
-          <h2>
-            {orders.length}
-          </h2>
+        <h2>
+          Order Status
+        </h2>
 
-          <p>
-            Total Orders
-          </p>
+        <p>
+          Pending: {pendingOrders}
+        </p>
 
-        </div>
+        <p>
+          Processing: {processingOrders}
+        </p>
 
-        <div>
+        <p>
+          Shipped: {shippedOrders}
+        </p>
 
-          <h2>
-            {customers}
-          </h2>
+        <p>
+          Completed: {completedOrders}
+        </p>
 
-          <p>
-            Total Customers
-          </p>
+        <p>
+          Cancelled: {cancelledOrders}
+        </p>
 
-        </div>
+        <h2>
+          Low Stock Alerts
+        </h2>
 
-        <div>
-
-          <h2>
-            {totalProducts}
-          </h2>
-
-          <p>
-            Products
-          </p>
-
-        </div>
-
-        <div>
-
-          <h2>
-            {completedOrders}
-          </h2>
+        {lowStockProducts.length === 0 ? (
 
           <p>
-            Completed Orders
+            No low stock products.
           </p>
 
-        </div>
+        ) : (
+
+          lowStockProducts.map((product)=>(
+
+            <div key={product.id}>
+
+              <p>
+                {product.name} - {product.stock} remaining
+              </p>
+
+            </div>
+
+          ))
+
+        )}
+
+        <h2>
+          AI Business Summary
+        </h2>
+
+        <p>
+          Revenue is currently £{revenue.toFixed(2)}.
+          There are {orders.length} total orders and{" "}
+          {lowStockProducts.length} products that need restocking.
+        </p>
 
       </section>
 
