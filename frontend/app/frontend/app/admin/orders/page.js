@@ -34,11 +34,9 @@ export default function AdminOrders() {
       status
     );
 
-
     loadOrders();
 
   }
-
 
 
   useEffect(() => {
@@ -48,13 +46,11 @@ export default function AdminOrders() {
   }, []);
 
 
-
   return (
 
     <main>
 
       <Navbar />
-
 
       <section>
 
@@ -62,61 +58,90 @@ export default function AdminOrders() {
           KuroKage Order Management
         </h1>
 
+        {orders.length === 0 ? (
 
-        {orders.map((order)=>(
+          <p>No orders found.</p>
 
-          <div key={order.id}>
+        ) : (
 
-            <h3>
-              Order:
-              {" "}
-              {order.id}
-            </h3>
+          orders.map((order)=>(
 
+            <div key={order.id}>
 
-            <p>
-              Customer:
-              {" "}
-              {order.email}
-            </p>
+              <h3>
+                Order: {order.id}
+              </h3>
 
+              <p>
+                Customer: {order.email}
+              </p>
 
-            <p>
-              Payment:
-              {" "}
-              {order.paymentStatus}
-            </p>
+              <p>
+                Payment: {order.paymentStatus}
+              </p>
 
+              <p>
+                Status: {order.orderStatus}
+              </p>
 
-            <p>
-              Status:
-              {" "}
-              {order.orderStatus}
-            </p>
+              <p>
+                Total: £{order.total}
+              </p>
 
+              <button
+                onClick={() =>
+                  changeStatus(
+                    order.id,
+                    "processing"
+                  )
+                }
+              >
+                Processing
+              </button>
 
-            <button
-              onClick={() =>
-                changeStatus(
-                  order.id,
-                  "completed"
-                )
-              }
-            >
-              Complete Order
-            </button>
+              <button
+                onClick={() =>
+                  changeStatus(
+                    order.id,
+                    "shipped"
+                  )
+                }
+              >
+                Shipped
+              </button>
 
+              <button
+                onClick={() =>
+                  changeStatus(
+                    order.id,
+                    "completed"
+                  )
+                }
+              >
+                Completed
+              </button>
 
-          </div>
+              <button
+                onClick={() =>
+                  changeStatus(
+                    order.id,
+                    "cancelled"
+                  )
+                }
+              >
+                Cancelled
+              </button>
 
-        ))}
+            </div>
 
+          ))
+
+        )}
 
       </section>
-
 
     </main>
 
   );
 
-}
+          }
