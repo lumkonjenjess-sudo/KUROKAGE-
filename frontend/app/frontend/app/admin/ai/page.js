@@ -14,9 +14,14 @@ export default function AdminAI() {
 
   const [response, setResponse] = useState("");
 
+  const [loading, setLoading] = useState(false);
+
 
 
   async function sendTask() {
+
+    setLoading(true);
+
 
     const result =
       await askAdminAI(
@@ -27,6 +32,9 @@ export default function AdminAI() {
     setResponse(
       result.response
     );
+
+
+    setLoading(false);
 
   }
 
@@ -42,13 +50,20 @@ export default function AdminAI() {
       <section>
 
         <h1>
-          KuroKage AI Admin
+          KuroKage AI Admin Control Center
         </h1>
+
+
+        <p>
+          Ask KuroKage AI to analyse and manage your store.
+        </p>
 
 
         <input
 
-          placeholder="Ask AI to help manage your store..."
+          placeholder="Ask AI about sales, products, customers..."
+
+          value={task}
 
           onChange={(e)=>
             setTask(
@@ -60,12 +75,22 @@ export default function AdminAI() {
 
 
         <button
+
           onClick={sendTask}
+
         >
 
-          Ask AI
+          {loading
+            ? "Analysing..."
+            : "Ask AI"}
 
         </button>
+
+
+
+        <h2>
+          AI Response
+        </h2>
 
 
         <p>
