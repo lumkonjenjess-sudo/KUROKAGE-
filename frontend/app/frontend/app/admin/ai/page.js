@@ -14,6 +14,8 @@ export default function AdminAI() {
 
   const [response, setResponse] = useState("");
 
+  const [analytics, setAnalytics] = useState(null);
+
   const [loading, setLoading] = useState(false);
 
 
@@ -31,6 +33,11 @@ export default function AdminAI() {
 
     setResponse(
       result.response
+    );
+
+
+    setAnalytics(
+      result.analytics
     );
 
 
@@ -54,14 +61,9 @@ export default function AdminAI() {
         </h1>
 
 
-        <p>
-          Ask KuroKage AI to analyse and manage your store.
-        </p>
-
-
         <input
 
-          placeholder="Ask AI about sales, products, customers..."
+          placeholder="Ask AI about your store..."
 
           value={task}
 
@@ -75,9 +77,7 @@ export default function AdminAI() {
 
 
         <button
-
           onClick={sendTask}
-
         >
 
           {loading
@@ -89,13 +89,54 @@ export default function AdminAI() {
 
 
         <h2>
-          AI Response
+          AI Business Advice
         </h2>
 
 
         <p>
           {response}
         </p>
+
+
+
+        {analytics && (
+
+          <section>
+
+            <h2>
+              Store Analytics
+            </h2>
+
+
+            <p>
+              Revenue: £{analytics.revenue}
+            </p>
+
+
+            <p>
+              Orders:
+              {" "}
+              {analytics.totalOrders}
+            </p>
+
+
+            <p>
+              Products:
+              {" "}
+              {analytics.totalProducts}
+            </p>
+
+
+            <p>
+              Low Stock Items:
+              {" "}
+              {analytics.lowStockProducts.length}
+            </p>
+
+
+          </section>
+
+        )}
 
 
       </section>
