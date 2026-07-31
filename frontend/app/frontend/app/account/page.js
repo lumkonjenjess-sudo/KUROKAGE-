@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Navbar from "../../components/Navbar";
 
 import {
@@ -8,60 +8,156 @@ import {
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
   signInWithPopup,
-  GoogleAuthProvider
+  GoogleAuthProvider,
+  sendPasswordResetEmail,
+  signOut,
+  onAuthStateChanged
 } from "firebase/auth";
 
 import app from "../../../backend/firebase/firebase";
 
-
 const auth = getAuth(app);
-
 const provider = new GoogleAuthProvider();
-
 
 export default function Account() {
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState("");
+
+  useEffect(() => {
+
+    const unsubscribe = onAuthStateChanged(
+      auth,
+      (currentUser) => {
+        setUser(currentUser);
+      }
+    );
+
+    return unsubscribe;
+
+  }, []);
 
   async function register() {
 
-    await createUserWithEmailAndPassword(
-      auth,
-      email,
-      password
-    );
+    try {
 
-    alert("Account created");
+      setLoading(true);
+
+      await createUserWithEmailAndPassword(
+        auth,
+        email,
+        password
+      );
+
+      setMessage("Account created successfully.");
+
+    } catch (error) {
+
+      setMessage(error.message);
+
+    }
+
+    setLoading(false);
 
   }
-
 
   async function login() {
 
-    await signInWithEmailAndPassword(
-      auth,
-      email,
-      password
-    );
+    try {
 
-    alert("Logged in");
+      setLoading(true);
+
+      await signInWithEmailAndPassword(
+        auth,
+        email,
+        password
+      );
+
+      setMessage("Login successful.");
+
+    } catch (error) {
+
+      setMessage(error.message);
+
+    }
+
+    setLoading(false);
 
   }
-
 
   async function googleLogin() {
 
-    await signInWithPopup(
-      auth,
-      provider
-    );
+    try {
 
-    alert("Google login successful");
+      setLoading(true);
+
+      await signInWithPopup(
+        auth,
+        provider
+      );
+
+      setMessage("Google login successful.");
+
+    } catch (error) {
+
+      setMessage(error.message);
+
+    }
+
+    setLoading(false);
 
   }
 
+  async function logout() {
+
+    try {
+
+      await signOut(auth);
+
+      setMessage("Logged out successfully.");
+
+    } catch (error) {
+
+      setMessage(error.message);
+
+    }
+
+  }
+
+  async function forgotPassword() {
+
+    if (!email) {
+
+      setMessage(
+        "Please enter your email first."
+      );
+
+      return;
+
+    }
+
+    try {
+
+      await sendPasswordResetEmail(
+        auth,
+        email
+      );
+
+      setMessage(
+        "Password reset email sent."
+      );
+
+    } catch (error) {
+
+      setMessage(error.message);
+
+    }
+
+  }
 
   return (
 
@@ -75,38 +171,93 @@ export default function Account() {
           KuroKage Account
         </h1>
 
+        {user ? (
+
+          <div>
+
+            <h3>
+              Welcome
+            </h3>
+
+            <p>
+              {user.email}
+            </p>
+
+          </div>
+
+        ) : (
+
+          <p>
+            Not logged in.
+          </p>
+
+        )}
 
         <input
           placeholder="Email"
+          value={email}
           onChange={(e)=>
             setEmail(e.target.value)
           }
         />
 
-
         <input
           placeholder="Password"
           type="password"
+          value={password}
           onChange={(e)=>
             setPassword(e.target.value)
           }
         />
 
-
-        <button onClick={register}>
+        <button
+          onClick={register}
+          disabled={loading}
+        >
           Create Account
         </button>
 
-
-        <button onClick={login}>
+        <button
+          onClick={login}
+          disabled={loading}
+        >
           Login
         </button>
 
-
-        <button onClick={googleLogin}>
+        <button
+          onClick={googleLogin}
+          disabled={loading}
+        >
           Continue with Google
         </button>
 
+        <button
+          onClick={forgotPassword}
+        >
+          Forgot Password
+        </button>
+
+        <button
+          onClick={logout}
+        >
+          Logout
+        </button>
+
+        {loading && (
+
+          <p>
+            Loading...
+          </p>
+
+        )}
+
+        {message && (
+
+          <p>
+            {message}
+          </p>
+
+        )}
 
       </section>
 
