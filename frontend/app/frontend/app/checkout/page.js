@@ -5,6 +5,13 @@ import Navbar from "../../components/Navbar";
 import { useCart } from "../../context/CartContext";
 
 import {
+  getAuth,
+  onAuthStateChanged
+} from "firebase/auth";
+
+import app from "../../../backend/firebase/firebase";
+
+import {
   createOrder
 } from "../../../backend/database/orders";
 
@@ -25,10 +32,13 @@ import {
   rewardPurchase
 } from "../../../backend/shadow/orderRewards";
 
+const auth = getAuth(app);
 
 export default function Checkout() {
 
   const { cart } = useCart();
+
+  const [user, setUser] = useState(null);
 
   const [email, setEmail] = useState("");
 
@@ -40,40 +50,47 @@ export default function Checkout() {
 
   const [pointsEarned, setPointsEarned] = useState(0);
 
-
-
   async function loadMemberTier() {
 
     const data =
-      await getMembership(
-        "currentUser"
-      );
-
+      await getMembership("currentUser");
 
     if (data.length > 0) {
 
-      setMemberTier(
-        data[0].tier
-      );
+      setMemberTier(data[0].tier);
 
-
-      setMembershipId(
-        data[0].id
-      );
+      setMembershipId(data[0].id);
 
     }
 
   }
 
-
-
   useEffect(() => {
 
     loadMemberTier();
 
+    const unsubscribe =
+      onAuthStateChanged(
+
+        auth,
+
+        (currentUser) => {
+
+          if (currentUser) {
+
+            setUser(currentUser);
+
+            setEmail(currentUser.email || "");
+
+          }
+
+        }
+
+      );
+
+    return unsubscribe;
+
   }, []);
-
-
 
   const total =
     cart.reduce(
@@ -82,12 +99,8 @@ export default function Checkout() {
       0
     );
 
-
   const discount =
-    getMemberDiscount(
-      memberTier
-    );
-
+    getMemberDiscount(memberTier);
 
   const finalTotal =
     applyDiscount(
@@ -95,12 +108,22 @@ export default function Checkout() {
       discount
     );
 
-
-
   async function placeOrder() {
+
+    if (!user) {
+
+      alert(
+        "Please log in before placing an order."
+      );
+
+      return;
+
+    }
 
     const order =
       await createOrder({
+
+        userId: user.uid,
 
         email,
 
@@ -108,31 +131,23 @@ export default function Checkout() {
 
         paymentMethod,
 
-        membershipTier:
-          memberTier,
+        membershipTier: memberTier,
 
-        originalTotal:
-          total,
+        originalTotal: total,
 
         discount,
 
-        total:
-          finalTotal,
+        total: finalTotal,
 
-        status:
-          "pending"
+        status: "pending"
 
       });
-
-
 
     const payment =
       await processPayment(
         paymentMethod,
         order
       );
-
-
 
     if (membershipId) {
 
@@ -142,25 +157,19 @@ export default function Checkout() {
           finalTotal
         );
 
-
       setPointsEarned(
         reward.pointsEarned
       );
 
     }
 
-
-
     console.log(payment);
 
-
     alert(
-      "Order created. Points added to your Shadow Society account."
+      "Order created successfully. Shadow Society points have been added to your account."
     );
 
   }
-
-
 
   return (
 
@@ -168,35 +177,23 @@ export default function Checkout() {
 
       <Navbar />
 
-
       <section>
 
         <h1>
           KuroKage Checkout
         </h1>
 
-
         <input
-
           placeholder="Email"
-
           value={email}
-
           onChange={(e)=>
-            setEmail(
-              e.target.value
-            )
+            setEmail(e.target.value)
           }
-
         />
 
-
         <h3>
-          Shadow Society Tier:
-          {" "}
-          {memberTier}
+          Shadow Society Tier: {memberTier}
         </h3>
-
 
         {pointsEarned > 0 && (
 
@@ -206,51 +203,70 @@ export default function Checkout() {
 
         )}
 
-
         <h3>
-          Items:
+          Items
         </h3>
-
 
         {cart.map((item)=>(
 
           <p key={item.id}>
-
-            {item.name}
-            {" "}x{" "}
-            {item.quantity}
-
+            {item.name} x {item.quantity}
           </p>
 
         ))}
 
-
         <h3>
-          Original Total:
-          {" "}
-          £{total.toFixed(2)}
+          Original Total: £{total.toFixed(2)}
         </h3>
 
-
         <h3>
-          Member Discount:
-          {" "}
-          {discount}%
+          Member Discount: {discount}%
         </h3>
-
 
         <h2>
-          Final Total:
-          {" "}
-          £{finalTotal.toFixed(2)}
+          Final Total: £{finalTotal.toFixed(2)}
         </h2>
-
 
         <h3>
           Select Payment Method
         </h3>
 
-
         <select
+          value={paymentMethod}
+          onChange={(e)=>
+            setPaymentMethod(
+              e.target.value
+            )
+          }
+        >
+          <option value="">
+            Choose payment
+          </option>
 
-         
+          <option value="PayPal">
+            PayPal
+          </option>
+
+          <option value="Capitec">
+            Capitec
+          </option>
+
+          <option value="Card">
+            Bank Card
+          </option>
+
+        </select>
+
+        <button
+          onClick={placeOrder}
+        >
+          Continue Payment
+        </button>
+
+      </section>
+
+    </main>
+
+  );
+
+}
