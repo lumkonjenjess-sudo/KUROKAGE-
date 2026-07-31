@@ -12,7 +12,8 @@ import app from "../../../backend/firebase/firebase";
 
 import {
   getProfile,
-  createProfile
+  createProfile,
+  updateProfile
 } from "../../../backend/database/userProfiles";
 
 import {
@@ -21,52 +22,49 @@ import {
   followUser
 } from "../../../backend/database/follows";
 
-
 const auth = getAuth(app);
-
 
 export default function Profile() {
 
+  const [firebaseUser, setFirebaseUser] = useState(null);
+
   const [profile, setProfile] = useState(null);
 
-  const [userId, setUserId] = useState(null);
+  const [username, setUsername] = useState("");
+
+  const [bio, setBio] = useState("");
 
   const [followers, setFollowers] = useState(0);
 
   const [following, setFollowing] = useState(0);
 
-
-
   async function loadProfile(uid) {
 
-    let data =
-      await getProfile(uid);
-
+    let data = await getProfile(uid);
 
     if (!data) {
 
-      await createProfile(
-        uid,
-        {
-          username: "KuroKage User",
-          bio: "Anime streetwear creator"
-        }
-      );
+      await createProfile(uid, {
 
+        username: "KuroKage User",
 
-      data =
-        await getProfile(uid);
+        bio: "Anime streetwear creator"
+
+      });
+
+      data = await getProfile(uid);
 
     }
 
-
     setProfile(data);
 
+    setUsername(data.username);
+
+    setBio(data.bio);
 
     setFollowers(
       await getFollowers(uid)
     );
-
 
     setFollowing(
       await getFollowing(uid)
@@ -74,44 +72,67 @@ export default function Profile() {
 
   }
 
-
-
   useEffect(() => {
 
-    onAuthStateChanged(
+    const unsubscribe = onAuthStateChanged(
+
       auth,
-      (user) => {
+
+      async (user) => {
 
         if (user) {
 
-          setUserId(user.uid);
+          setFirebaseUser(user);
 
-          loadProfile(user.uid);
+          await loadProfile(user.uid);
 
         }
 
       }
+
     );
+
+    return unsubscribe;
 
   }, []);
 
+  async function saveProfile() {
 
+    if (!firebaseUser) return;
 
-  async function follow() {
+    await updateProfile(
 
-    await followUser(
-      "currentUser",
-      userId
+      firebaseUser.uid,
+
+      {
+
+        username,
+
+        bio
+
+      }
+
     );
 
-
-    setFollowers(
-      followers + 1
-    );
+    alert("Profile updated successfully.");
 
   }
 
+  async function follow() {
 
+    if (!firebaseUser) return;
+
+    await followUser(
+
+      "currentUser",
+
+      firebaseUser.uid
+
+    );
+
+    setFollowers(followers + 1);
+
+  }
 
   return (
 
@@ -119,53 +140,143 @@ export default function Profile() {
 
       <Navbar />
 
-
       <section>
 
         <h1>
+
           KuroKage Profile
+
         </h1>
 
-
-        {profile ? (
+        {firebaseUser && profile ? (
 
           <div>
 
-            <h2>
-              {profile.username}
-            </h2>
+            <div>
 
+              <img
+
+                src="/profile-placeholder.png"
+
+                alt="Profile"
+
+                width={120}
+
+                height={120}
+
+              />
+
+            </div>
 
             <p>
-              {profile.bio}
-            </p>
 
+              <strong>Email:</strong>{" "}
+
+              {firebaseUser.email}
+
+            </p>
 
             <p>
-              Followers: {followers}
-            </p>
 
+              <strong>User ID:</strong>{" "}
+
+              {firebaseUser.uid}
+
+            </p>
 
             <p>
-              Following: {following}
+
+              <strong>Account Created:</strong>{" "}
+
+              {new Date(
+                firebaseUser.metadata.creationTime
+              ).toLocaleString()}
+
             </p>
 
+            <p>
 
-            <button onClick={follow}>
-              Follow
+              <strong>Last Login:</strong>{" "}
+
+              {new Date(
+                firebaseUser.metadata.lastSignInTime
+              ).toLocaleString()}
+
+            </p>
+
+            <h3>
+
+              Username
+
+            </h3>
+
+            <input
+
+              value={username}
+
+              onChange={(e)=>
+
+                setUsername(e.target.value)
+
+              }
+
+            />
+
+            <h3>
+
+              Bio
+
+            </h3>
+
+            <textarea
+
+              value={bio}
+
+              onChange={(e)=>
+
+                setBio(e.target.value)
+
+              }
+
+            />
+
+            <button onClick={saveProfile}>
+
+              Save Profile
+
             </button>
 
+            <hr />
+
+            <p>
+
+              Followers: {followers}
+
+            </p>
+
+            <p>
+
+              Following: {following}
+
+            </p>
+
+            <button onClick={follow}>
+
+              Follow
+
+            </button>
 
           </div>
 
         ) : (
 
           <p>
-            Login to view profile.
+
+            Login to view your profile.
+
           </p>
 
         )}
-
 
       </section>
 
