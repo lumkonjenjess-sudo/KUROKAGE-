@@ -5,6 +5,7 @@ import {
   getDocs,
   query,
   orderBy,
+  where,
   doc,
   updateDoc
 } from "firebase/firestore";
@@ -15,19 +16,17 @@ import {
   getReferralCode
 } from "../affiliate/referralTracker";
 
-
 const db = getFirestore(app);
-
-
 
 export async function createOrder(order) {
 
   const referralCode =
     getReferralCode();
 
-
   return await addDoc(
+
     collection(db, "orders"),
+
     {
 
       ...order,
@@ -45,15 +44,17 @@ export async function createOrder(order) {
         new Date()
 
     }
+
   );
 
 }
 
-
-
 export async function updateOrderPaymentStatus(
+
   orderId,
+
   paymentStatus
+
 ) {
 
   const orderRef =
@@ -63,9 +64,10 @@ export async function updateOrderPaymentStatus(
       orderId
     );
 
-
   await updateDoc(
+
     orderRef,
+
     {
 
       paymentStatus,
@@ -74,15 +76,17 @@ export async function updateOrderPaymentStatus(
         new Date()
 
     }
+
   );
 
 }
 
-
-
 export async function updateOrderStatus(
+
   orderId,
+
   orderStatus
+
 ) {
 
   const orderRef =
@@ -92,9 +96,10 @@ export async function updateOrderStatus(
       orderId
     );
 
-
   await updateDoc(
+
     orderRef,
+
     {
 
       orderStatus,
@@ -103,34 +108,76 @@ export async function updateOrderStatus(
         new Date()
 
     }
+
   );
 
 }
 
-
-
 export async function getOrders() {
 
   const ordersQuery =
+
     query(
+
       collection(db, "orders"),
+
       orderBy(
         "createdAt",
         "desc"
       )
+
     );
 
-
   const snapshot =
+
     await getDocs(
       ordersQuery
     );
 
+  return snapshot.docs.map((doc)=>({
+
+    id: doc.id,
+
+    ...doc.data()
+
+  }));
+
+}
+
+export async function getOrdersByUser(
+
+  userId
+
+) {
+
+  const ordersQuery =
+
+    query(
+
+      collection(db, "orders"),
+
+      where(
+        "userId",
+        "==",
+        userId
+      ),
+
+      orderBy(
+        "createdAt",
+        "desc"
+      )
+
+    );
+
+  const snapshot =
+
+    await getDocs(
+      ordersQuery
+    );
 
   return snapshot.docs.map((doc)=>({
 
-    id:
-      doc.id,
+    id: doc.id,
 
     ...doc.data()
 
