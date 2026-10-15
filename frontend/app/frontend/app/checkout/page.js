@@ -28,192 +28,240 @@ import {
   getMembership
 } from "../../../backend/database/memberships";
 
-import {
-  rewardPurchase
-} from "../../../backend/shadow/orderRewards";
-
 const auth = getAuth(app);
 
 export default function Checkout() {
-
   const { cart } = useCart();
 
   const [user, setUser] = useState(null);
-
   const [email, setEmail] = useState("");
-
   const [paymentMethod, setPaymentMethod] = useState("");
-
   const [memberTier, setMemberTier] = useState("Shadow");
-
   const [membershipId, setMembershipId] = useState("");
-
-  const [pointsEarned, setPointsEarned] = useState(0);
-
-  async function loadMemberTier() {
-
-    const data =
-      await getMembership("currentUser");
-
-    if (data.length > 0) {
-
-      setMemberTier(data[0].tier);
-
-      setMembershipId(data[0].id);
-
-    }
-
-  }
+  const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
+  const [message, setMessage] = useState("");
 
   useEffect(() => {
+    const unsubscribe = onAuthStateChanged(
+      auth,
+      async (currentUser) => {
+        setUser(currentUser);
+        setMessage("");
 
-    loadMemberTier();
-
-    const unsubscribe =
-      onAuthStateChanged(
-
-        auth,
-
-        (currentUser) => {
-
-          if (currentUser) {
-
-            setUser(currentUser);
-
-            setEmail(currentUser.email || "");
-
-          }
-
+        if (!currentUser) {
+          setEmail("");
+          setMemberTier("Shadow");
+          setMembershipId("");
+          setLoading(false);
+          return;
         }
 
-      );
+        setEmail(currentUser.email || "");
+        setLoading(true);
+
+        try {
+          const memberships = await getMembership(
+            currentUser.uid
+          );
+
+          if (memberships.length > 0) {
+            setMemberTier(
+              memberships[0].tier || "Shadow"
+            );
+            setMembershipId(memberships[0].id);
+          } else {
+            setMemberTier("Shadow");
+            setMembershipId("");
+          }
+        } catch (error) {
+          console.error(
+            "Membership loading failed:",
+            error
+          );
+
+          setMemberTier("Shadow");
+          setMembershipId("");
+          setMessage(
+            "We couldn't load your membership. Please try again."
+          );
+        } finally {
+          setLoading(false);
+        }
+      }
+    );
 
     return unsubscribe;
-
   }, []);
 
-  const total =
-    cart.reduce(
-      (sum, item) =>
-        sum + (item.price * item.quantity),
-      0
-    );
+  const total = cart.reduce(
+    (sum, item) =>
+      sum +
+      Number(item.price) * Number(item.quantity),
+    0
+  );
 
-  const discount =
-    getMemberDiscount(memberTier);
+  const discount = getMemberDiscount(memberTier);
 
-  const finalTotal =
-    applyDiscount(
-      total,
-      discount
-    );
+  const finalTotal = applyDiscount(
+    total,
+    discount
+  );
 
   async function placeOrder() {
+    if (submitting) return;
+
+    setMessage("");
 
     if (!user) {
-
-      alert(
-        "Please log in before placing an order."
-      );
-
+      setMessage("Please log in before placing an order.");
       return;
-
     }
 
-    const order =
-      await createOrder({
+    if (loading) {
+      setMessage("Please wait while your account loads.");
+      return;
+    }
 
+    if (!email.trim()) {
+      setMessage("Please enter your email address.");
+      return;
+    }
+
+    if (cart.length === 0) {
+      setMessage("Your cart is empty.");
+      return;
+    }
+
+    const invalidItem = cart.some(
+      (item) =>
+        !item.id ||
+        !Number.isFinite(Number(item.price)) ||
+        Number(item.price) < 0 ||
+        !Number.isInteger(Number(item.quantity)) ||
+        Number(item.quantity) <= 0
+    );
+
+    if (invalidItem) {
+      setMessage(
+        "Your cart contains an invalid item. Please review your cart."
+      );
+      return;
+    }
+
+    if (!paymentMethod) {
+      setMessage("Please select a payment method.");
+      return;
+    }
+
+    if (
+      !Number.isFinite(finalTotal) ||
+      finalTotal < 0
+    ) {
+      setMessage("The order total is invalid.");
+      return;
+    }
+
+    setSubmitting(true);
+
+    try {
+      const order = await createOrder({
         userId: user.uid,
-
-        email,
-
+        email: email.trim(),
         items: cart,
-
         paymentMethod,
-
         membershipTier: memberTier,
-
+        membershipId: membershipId || null,
         originalTotal: total,
-
         discount,
-
         total: finalTotal,
-
+        currency: "GBP",
         status: "pending"
-
       });
 
-    const payment =
-      await processPayment(
+      const payment = await processPayment(
         paymentMethod,
         order
       );
 
-    if (membershipId) {
-
-      const reward =
-        await rewardPurchase(
-          membershipId,
-          finalTotal
+      if (payment.status === "failed") {
+        setMessage(
+          "Payment could not be started. Your order was saved but is not paid. Please check your orders before trying again."
         );
+        return;
+      }
 
-      setPointsEarned(
-        reward.pointsEarned
+      if (payment.status === "redirect_required") {
+        setMessage(
+          "Your order was saved, but PayPal is not connected yet. Payment is not confirmed, and no reward points have been awarded."
+        );
+        return;
+      }
+
+      if (payment.status === "gateway_required") {
+        setMessage(
+          `${payment.provider} is not connected to a real payment gateway yet. Payment is not confirmed, and no reward points have been awarded.`
+        );
+        return;
+      }
+
+      setMessage(
+        "The payment provider returned an unrecognised status. Your order is not confirmed as paid."
       );
+    } catch (error) {
+      console.error("Checkout error:", error);
 
+      setMessage(
+        "Something went wrong. Check your orders before retrying to avoid creating a duplicate order."
+      );
+    } finally {
+      setSubmitting(false);
     }
-
-    console.log(payment);
-
-    alert(
-      "Order created successfully. Shadow Society points have been added to your account."
-    );
-
   }
 
   return (
-
     <main>
-
       <Navbar />
 
       <section>
+        <h1>KuroKage Checkout</h1>
 
-        <h1>
-          KuroKage Checkout
-        </h1>
+        {!user && !loading && (
+          <p>Please log in before checking out.</p>
+        )}
+
+        <label htmlFor="checkout-email">
+          Email address
+        </label>
 
         <input
+          id="checkout-email"
+          type="email"
           placeholder="Email"
           value={email}
-          onChange={(e)=>
-            setEmail(e.target.value)
+          onChange={(event) =>
+            setEmail(event.target.value)
           }
+          disabled={submitting}
         />
 
         <h3>
           Shadow Society Tier: {memberTier}
         </h3>
 
-        {pointsEarned > 0 && (
+        {loading && <p>Loading account details...</p>}
 
-          <p>
-            You earned {pointsEarned} Shadow Society points!
-          </p>
+        <h3>Items</h3>
 
+        {cart.length === 0 ? (
+          <p>Your cart is empty.</p>
+        ) : (
+          cart.map((item) => (
+            <p key={item.id}>
+              {item.name} x {item.quantity}
+            </p>
+          ))
         )}
-
-        <h3>
-          Items
-        </h3>
-
-        {cart.map((item)=>(
-
-          <p key={item.id}>
-            {item.name} x {item.quantity}
-          </p>
-
-        ))}
 
         <h3>
           Original Total: £{total.toFixed(2)}
@@ -227,17 +275,19 @@ export default function Checkout() {
           Final Total: £{finalTotal.toFixed(2)}
         </h2>
 
-        <h3>
-          Select Payment Method
-        </h3>
+        <h3>Select Payment Method</h3>
+
+        <label htmlFor="payment-method">
+          Payment method
+        </label>
 
         <select
+          id="payment-method"
           value={paymentMethod}
-          onChange={(e)=>
-            setPaymentMethod(
-              e.target.value
-            )
+          onChange={(event) =>
+            setPaymentMethod(event.target.value)
           }
+          disabled={submitting}
         >
           <option value="">
             Choose payment
@@ -254,19 +304,31 @@ export default function Checkout() {
           <option value="Card">
             Bank Card
           </option>
-
         </select>
 
         <button
           onClick={placeOrder}
+          disabled={
+            submitting ||
+            loading ||
+            !user ||
+            cart.length === 0
+          }
         >
-          Continue Payment
+          {submitting
+            ? "Processing..."
+            : "Continue Payment"}
         </button>
 
+        {message && (
+          <p role="status">{message}</p>
+        )}
+
+        <p>
+          Reward points will only be awarded after
+          payment is successfully verified.
+        </p>
       </section>
-
     </main>
-
   );
-
 }
